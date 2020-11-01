@@ -12,22 +12,30 @@ class FrameError(Exception):
     """Frame was corrupt"""
     pass
 
+def mirror_frames(frames: list) -> list:
+    mirrored = []
+    for frame in frames:
+        mirrored_frame = []
+        for pixel in frame:
+            mirrored_frame.insert(0, pixel)
+        mirrored.append(mirrored_frame)
+    return mirrored
+
 class EffectBase(object):
-    def __init__(self, brightness=None):
+    def __init__(self, frames, mirror=False, brightness=None):
         self.brightness = 0.2 if not brightness else brightness
         self.fps = 1
-        self.frames = []
+        self.frames = frames if not mirror else mirror_frames(frames)
         self.frame_n = 0
         self.frame = None
         self.overwrite = []
-
-
+        self.mirror = mirror
 
     def step(self):
         """Execute frame"""
         if len(self.frame) == blinkt.NUM_PIXELS:  # check if normal frame
             for i in range(blinkt.NUM_PIXELS):
-                blinkt.set_pixel(i, *self.frame[i], brightness=self.brightness)
+                blinkt.set_pixel(i, *self.frame[i])  #, brightness=self.brightness)
             blinkt.show()
         elif len(self.frame) == 1:  # check if special frame
             action = self.frame[0]
@@ -40,6 +48,10 @@ class EffectBase(object):
             raise FrameError
         self._custom_action()
         self._next_frame()
+
+    def add_overwrite(self, frames):
+        "Replace running frames with other frames"
+        self.overwrite = frames.copy() if not self.mirror else mirror_frames(frames)
 
     def _custom_action(self):
         pass

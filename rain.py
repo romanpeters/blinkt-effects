@@ -3,29 +3,26 @@ import random
 
 class Drip(EffectBase):
     def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
-        self.frames = raindrop_falling
+        super().__init__(*args, **kwargs)
         self.fps = 3
 
 class Rain(EffectBase):
     def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
-        self.frames = raindrop_falling
-        self.fps = 5
+        super().__init__(*args, **kwargs)
+        self.fps = 10
 
 class ThunderRain(EffectBase):
     def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
-        self.frames = raindrop_falling
-        self.fps = 5
+        super().__init__(*args, **kwargs)
+        self.fps = 10
 
     def _custom_action(self):
-        if random.randint(0, 10) == 1:
-            self.overwrite = thunder_flash.copy()
+        if random.randint(0, 15) == 1:
+            self.add_overwrite(thunder_flash)
 
-raindrop_falling = [
+raindrop_dripping = [
     [(0, 0, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
-    [(VariableDelay(1, 3))],
+    [(VariableDelay(1, 10))],
     [(0, 0, 0), (0, 0, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
     [(0, 0, 0), (0, 0, 0), (0, 0, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
     [(0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
@@ -35,7 +32,21 @@ raindrop_falling = [
     [(0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 255)],
     [(0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
     [(VariableDelay(0, 2))]
-]
+    ]
+
+
+raindrop_falling = [
+    [(0, 0, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
+    [(0, 0, 0), (0, 0, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
+    [(0, 0, 0), (0, 0, 0), (0, 0, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
+    [(0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
+    [(0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
+    [(0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 255), (0, 0, 0), (0, 0, 0)],
+    [(0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 255), (0, 0, 0)],
+    [(0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 255)],
+    [(0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
+    [(VariableDelay(0, 2))]
+    ]
 
 thunder_flash = [
     [(100, 100, 100), (100, 100, 100), (100, 100, 100), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
@@ -43,4 +54,5 @@ thunder_flash = [
 ]
 
 if __name__=="__main__":
-    rain = Rain().loop()
+    effect = ThunderRain(frames=raindrop_falling, mirror=True)
+    effect.loop()
