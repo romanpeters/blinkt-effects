@@ -7,7 +7,7 @@ except ImportError:
     import fake_blinkt as blinkt
 
 blinkt.set_clear_on_exit()
-
+OFF = (0, 0, 0)
 
 class FrameError(Exception):
     """Frame was corrupt"""
@@ -23,14 +23,25 @@ def mirror_frames(frames: list) -> list:
         mirrored.append(mirrored_frame)
     return mirrored
 
+def merge_frame(under_frame: list, over_frame: list) -> list:
+    new_frame = under_frame
+    for i in range(len(new_frame)):
+        if over_frame[i] != OFF:
+            new_frame[i] = over_frame[i]
+    return new_frame
+
 class EffectBase(object):
-    def __init__(self, frames, fps=5, mirror=False, brightness=None):
+    def __init__(self, frames, fps=5, mirror=False, overlay=None, underlay=None, brightness=None):
         self.brightness = 0.2 if not brightness else brightness
         self.fps = fps
         self.frames = frames if not mirror else mirror_frames(frames)
         self.frame_n = 0
         self.frame = None
         self.overwrite = []
+        self.underlay = underlay if underlay else []
+        self.underlay_n = 0
+        self.overlay = overlay if overlay else []
+        self.overlay_n = 0
         self.mirror = mirror
 
     def step(self):
@@ -55,20 +66,34 @@ class EffectBase(object):
         """Replace running frames with other frames"""
         self.overwrite = frames.copy() if not self.mirror else mirror_frames(frames)
 
+    def add_underlay(self, frames):
+        """Merge running frames with other frames"""
+        self.underlay = frames.copy() if not self.mirror else mirror_frames(frames)
+
+    def add_overlay(self, frames):
+        """Merge running frames with other frames"""
+        self.overlay = frames.copy() if not self.mirror else mirror_frames(frames)
+
     def _custom_action(self):
         """Can be used in inherited classes"""
         pass
 
     def _next_frame(self):
         """Go to the next frame"""
-        next = self.frame_n + 1
-        if next >= len(self.frames):
-            next = 0
-        self.frame_n = next
+        self.frame_n = self.frame_n + 1 if self.frame_n + 1 < len(self.frames) else 0
         self.frame = self.frames[self.frame_n]
-        if self.overwrite:
+        if self.overwrite:  # overwrites the frame
             self.frame = self.overwrite[0]
             self.overwrite.pop(0)
+            return  # frame is overwritten, so no need for over-/underlays
+        if self.underlay:  # adds another frame under the original frame
+            self.frame = merge_frame(self.underlay[self.underlay_n], self.frame)
+            self.underlay_n = self.underlay_n + 1 if self.underlay_n + 1 < len(self.underlay) else 0
+        if self.overlay:  # adds another frome over the original frame
+            self.frame = merge_frame(self.frame, self.overlay[self.overlay_n])
+            self.overlay_n = self.overlay_n + 1 if self.overlay_n + 1 < len(self.overlay) else 0
+
+
 
     def loop(self):
         """Run through the frames until stopped"""
