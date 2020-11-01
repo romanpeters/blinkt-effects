@@ -1,17 +1,11 @@
 from base import EffectBase, VariableDelay
 import random
 
-class Drip(EffectBase):
+class Precipitation(EffectBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fps = 3
 
-class Rain(EffectBase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fps = 10
-
-class ThunderRain(EffectBase):
+class Thunder(EffectBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fps = 10
@@ -34,7 +28,6 @@ raindrop_dripping = [
     [(VariableDelay(0, 2))]
     ]
 
-
 raindrop_falling = [
     [(0, 0, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
     [(0, 0, 0), (0, 0, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
@@ -48,11 +41,28 @@ raindrop_falling = [
     [(VariableDelay(0, 2))]
     ]
 
+snow_falling = [
+    [(255, 255, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
+    [(0, 0, 0), (255, 255, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
+    [(0, 0, 0), (0, 0, 0), (255, 255, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
+    [(0, 0, 0), (0, 0, 0), (0, 0, 0), (255, 255, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
+    [(0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (255, 255, 255), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
+    [(0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (255, 255, 255), (0, 0, 0), (0, 0, 0)],
+    [(0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (255, 255, 255), (0, 0, 0)],
+    [(0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (255, 255, 255)],
+    [(0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
+    [(VariableDelay(0, 2))]
+    ]
+
 thunder_flash = [
     [(100, 100, 100), (100, 100, 100), (100, 100, 100), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0), (0, 0, 0)],
     [(255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255), (255, 255, 255)],
 ]
 
 if __name__=="__main__":
-    effect = ThunderRain(frames=raindrop_falling, mirror=True)
+    drip = Precipitation(frames=raindrop_dripping, fps=3)
+    rain = Precipitation(frames=raindrop_falling, fps=10)
+    snow = Precipitation(frames=snow_falling, fps=3)
+
+    effect = Thunder(frames=raindrop_falling, fps=10, mirror=True)
     effect.loop()

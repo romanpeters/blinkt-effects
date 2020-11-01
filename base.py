@@ -8,9 +8,11 @@ except ImportError:
 
 blinkt.set_clear_on_exit()
 
+
 class FrameError(Exception):
     """Frame was corrupt"""
     pass
+
 
 def mirror_frames(frames: list) -> list:
     mirrored = []
@@ -22,9 +24,9 @@ def mirror_frames(frames: list) -> list:
     return mirrored
 
 class EffectBase(object):
-    def __init__(self, frames, mirror=False, brightness=None):
+    def __init__(self, frames, fps=5, mirror=False, brightness=None):
         self.brightness = 0.2 if not brightness else brightness
-        self.fps = 1
+        self.fps = fps
         self.frames = frames if not mirror else mirror_frames(frames)
         self.frame_n = 0
         self.frame = None
@@ -50,10 +52,11 @@ class EffectBase(object):
         self._next_frame()
 
     def add_overwrite(self, frames):
-        "Replace running frames with other frames"
+        """Replace running frames with other frames"""
         self.overwrite = frames.copy() if not self.mirror else mirror_frames(frames)
 
     def _custom_action(self):
+        """Can be used in inherited classes"""
         pass
 
     def _next_frame(self):
@@ -68,6 +71,7 @@ class EffectBase(object):
             self.overwrite.pop(0)
 
     def loop(self):
+        """Run through the frames until stopped"""
         if not self.frames:  # check if frames
             raise NotImplemented  # EffectBase must be inherited
         self.frame = self.frames[0]
