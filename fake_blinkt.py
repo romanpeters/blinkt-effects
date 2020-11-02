@@ -6,7 +6,7 @@ import sys
 from colr import color
 
 NUM_PIXELS = 8
-frame = ['\u25A0'] * 8
+frame = ['\u25A0'] * NUM_PIXELS
 
 
 def set_clear_on_exit():
