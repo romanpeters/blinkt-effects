@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import time
 import random
+import colorsys
 try:
     import blinkt
 except ImportError:
@@ -47,14 +48,26 @@ def compile_frames(frames: list) -> list:
         elif frame_length == 1:  # check if special frame
             action = frames[i][0]
 
+            # actions usually modify the previous frame
+            if result:  # action is not in frame #0
+                previous_frame = result[-1]
+            else:  # action is in frame #0
+                raise FrameError("First frame can't be an action frame")
+
             # VariableDelay
             if type(action) == VariableDelay:
-                if result:  # delay is not in frame #0
-                    freeze_frame = result[-1]
-                else:  # delay is in frame #0
-                    freeze_frame = frames[-1]
                 for j in range(action.frames_delay()):
-                    result.append(freeze_frame)
+                    result.append(previous_frame)
+
+            # BrightnessAdjust
+            elif type(action) == LightnessAdjust:
+                for j in range(action.repeat):
+                    action.set_frame(previous_frame)
+                    action.adjust()
+                    frame = action.get_frame()
+                    result.append(frame)
+                    previous_frame = frame
+
             else:
                 raise FrameError(f"Unknown action {type(action)}")
         else:
@@ -171,12 +184,97 @@ class Effect(EffectBase):
         super().__init__(*args, **kwargs)
 
 
-class VariableDelay(object):
-    def __init__(self, min=None, max=None):
-        self.min = 0 if not min else min
-        self.max = 3 if not max else max
+class ActionBase(object):
+    def __init__(self):
+        self.frame = None
+        self.hls = None
+
+    def set_frame(self, frame):
+        self.frame = frame
+
+    def get_frame(self):
+        return self.frame
+
+class VariableDelay(ActionBase):
+    def __init__(self, min_=0, max_=3):
+        super().__init__()
+        self.min = min_
+        self.max = max_
 
     def frames_delay(self):
         return random.randint(self.min, self.max)
+
+
+def rgb_to_hls(r, g, b) -> tuple:
+    # https://stackoverflow.com/questions/15442285/converting-rgb-to-hls-and-back
+    r, g, b = [x / 255.0 for x in (r, g, b)]
+    print(f"RGB {r},{g},{b} = HLS {colorsys.rgb_to_hls(r, g, b)}")
+    return colorsys.rgb_to_hls(r, g, b)
+
+
+def hls_to_rgb(h, l, s) -> tuple:
+    r, g, b = colorsys.hls_to_rgb(h, l, s)
+
+    def limit(x):
+        if x > 255:
+            return 255
+        elif x < 0:
+            return 0
+        return x
+    print(f"HLS {h},{l},{s} = RGB {tuple([limit(x * 255.0) for x in (r, g, b)])}")
+    return tuple([limit(x * 255.0) for x in (r, g, b)])
+
+
+class HueAdjust(ActionBase):
+    def __init__(self, increase, repeat):
+        super().__init__()
+        self.increase = increase
+        self.repeat = repeat
+
+    def adjust(self):
+        for i in range(len(self.frame)):
+            pixel = self.frame[i]
+            if pixel != OFF:
+                h, l, s = rgb_to_hls(*pixel)
+                h += self.increase
+                adjusted_pixel = hls_to_rgb(h, l, s)
+                if adjusted_pixel != OFF:
+                    self.frame[i] = adjusted_pixel
+
+class LightnessAdjust(ActionBase):
+    def __init__(self, increase, repeat):
+        super().__init__()
+        self.increase = increase
+        self.repeat = repeat
+
+    def adjust(self):
+        for i in range(len(self.frame)):
+            pixel = self.frame[i]
+            if pixel != OFF:
+                h, l, s = rgb_to_hls(*pixel)
+                l += self.increase
+                adjusted_pixel = hls_to_rgb(h, l, s)
+                if adjusted_pixel != OFF:
+                    self.frame[i] = adjusted_pixel
+
+
+class SaturationAdjust(ActionBase):
+    def __init__(self, increase, repeat):
+        super().__init__()
+        self.increase = increase
+        self.repeat = repeat
+
+    def adjust(self):
+        for i in range(len(self.frame)):
+            pixel = self.frame[i]
+            if pixel != OFF:
+                h, l, s = rgb_to_hls(*pixel)
+                s += self.increase
+                adjusted_pixel = hls_to_rgb(h, l, s)
+                if adjusted_pixel != OFF:
+                    self.frame[i] = adjusted_pixel
+
+
+
 
 

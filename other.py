@@ -1,4 +1,4 @@
-from base import Effect
+from base import Effect, LightnessAdjust
 
 X__________ = (0, 0, 0)
 
@@ -21,5 +21,14 @@ kit = [
     [(255, 0, 0), (8, 0, 0), X__________, X__________, X__________, X__________, X__________, X__________],
 ]
 
-knightrider = Effect(frames=kit)
-knightrider.loop()
+pulse_light = [
+    [X__________, X__________, X__________, X__________, (255, 255, 255), X__________, X__________, X__________],
+    [LightnessAdjust(increase=-10, repeat=10)],
+    [LightnessAdjust(increase=10, repeat=10)]
+]
+
+if __name__=="__main__":
+    knightrider = Effect(frames=kit)
+    pulse = Effect(frames=pulse_light, fps=10)
+
+    pulse.loop()
