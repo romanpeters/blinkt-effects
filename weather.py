@@ -68,10 +68,10 @@ if __name__=="__main__":
     # examples
     drip = Effect(frames=raindrop_dripping, fps=3)
     rain = Effect(frames=raindrop_falling, fps=10)
-    heavy_rain = Effect(frames=raindrop_falling, fps=10, overlay=flood)
+    heavy_rain = Effect(frames=raindrop_falling, fps=10, overlay=flood, mirrored=True)
     snow = Effect(frames=snow_falling, fps=3)
     heavy_snow = Effect(frames=snow_falling, fps=5, overlay=snow_layer)
 
     print("starting...")
-    effect = Thunder(frames=raindrop_falling, fps=5)
-    effect.loop()
+    effect = Thunder(frames=raindrop_falling, fps=10)
+    heavy_rain.loop()

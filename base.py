@@ -26,15 +26,17 @@ def mirror_frames(frames: list) -> list:
 def merge_frame(under_frame: list, over_frame: list) -> list:
     new_frame = under_frame
     for i in range(len(new_frame)):
-        if over_frame[i] != OFF:
+        if type(over_frame[i]) != tuple or type(under_frame[i]) != tuple:
+            pass
+        elif over_frame[i] != OFF:
             new_frame[i] = over_frame[i]
     return new_frame
 
 class EffectBase(object):
-    def __init__(self, frames, fps=5, mirror=False, overlay=None, underlay=None, brightness=None):
+    def __init__(self, frames, fps=5, mirrored=False, overlay=None, underlay=None, brightness=None):
         self.brightness = 0.2 if not brightness else brightness
         self.fps = fps
-        self.frames = frames if not mirror else mirror_frames(frames)
+        self.frames = frames
         self.frame_n = 0
         self.frame = None
         self.overwrite = []
@@ -42,7 +44,16 @@ class EffectBase(object):
         self.underlay_n = 0
         self.overlay = overlay if overlay else []
         self.overlay_n = 0
-        self.mirror = mirror
+        self.mirrored = False
+        if mirrored:
+            self.mirror()
+
+
+    def mirror(self):
+        self.frames = mirror_frames(self.frames)
+        self.underlay = mirror_frames(self.underlay)
+        self.overlay = mirror_frames(self.overlay)
+        self.mirrored = not self.mirrored  # toggle
 
     def step(self):
         """Execute frame"""
@@ -55,24 +66,24 @@ class EffectBase(object):
             if type(action) == VariableDelay:
                 time.sleep(action.frames_delay() * (1/self.fps))
             else:
-                raise FrameError
+                print(action)
+                raise FrameError(f"Unknown action {type(action)}")
         else:
-            print(len(self.frames))
-            raise FrameError
+            raise FrameError(f"Invalid frame number {len(self.frame)}, must be 1 or {blinkt.NUM_PIXELS}")
         self._custom_action()
         self._next_frame()
 
     def add_overwrite(self, frames):
         """Replace running frames with other frames"""
-        self.overwrite = frames.copy() if not self.mirror else mirror_frames(frames)
+        self.overwrite = frames.copy() if not self.mirrored else mirror_frames(frames)
 
     def add_underlay(self, frames):
         """Merge running frames with other frames"""
-        self.underlay = frames.copy() if not self.mirror else mirror_frames(frames)
+        self.underlay = frames.copy() if not self.mirrored else mirror_frames(frames)
 
     def add_overlay(self, frames):
         """Merge running frames with other frames"""
-        self.overlay = frames.copy() if not self.mirror else mirror_frames(frames)
+        self.overlay = frames.copy() if not self.mirrored else mirror_frames(frames)
 
     def _custom_action(self):
         """Can be used in inherited classes"""
