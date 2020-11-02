@@ -63,36 +63,36 @@ def compile_frames(frames: list) -> list:
 
 
 class FrameCollection(object):
-    def __init__(self, frames:list = None, mirrored=False, loop=True):
-        self.input_frames = frames if frames else []
-        self.frames = frames.copy() if frames else None
-        self.length = len(self.frames) if frames else 0 # set after compiling
+    def __init__(self, frames:list, mirrored=False, loop=True):
+        self.input_frames = frames
+        self.frames = frames.copy()
+        self.length = len(self.frames) # set after compiling
         self.mirrored = mirrored
         self.is_dynamic = False
         self.is_loop = loop
-        self.is_empty = False if frames else True
         self._analyse()
         if self.is_dynamic:
             self.compile()
         if self.mirrored:
             self.mirror()
-        self.frame_n = 0
+        self.cursor = 0
 
     def get_frame(self):
-        return self.frames[self.frame_n]
+        frame = self.frames[self.cursor]
+        self.next()
+        return frame
 
     def next(self):
         if self.is_loop:
-            self.frame_n = self.frame_n + 1
-            if self.frame_n >= self.length:
+            self.cursor = self.cursor + 1
+            if self.cursor >= self.length:
                 if self.is_dynamic:
                     self.compile()
-                self.frame_n = 0
+                self.cursor = 0
         else:
             self.frames.pop(0)
 
     def _analyse(self):
-        print("analyzing")
         for frame in self.input_frames:
             if len(frame) != blinkt.NUM_PIXELS:
                 self.is_dynamic = True
@@ -103,11 +103,8 @@ class FrameCollection(object):
         self.mirrored = not self.mirrored
 
     def compile(self):
-        print("compiling")
         self.frames = compile_frames(self.input_frames)
         self.length = len(self.frames)
-
-
 
 
 class EffectBase(object):
@@ -115,20 +112,12 @@ class EffectBase(object):
         self.brightness = 0.2 if not brightness else brightness
         self.fps = fps
         self.frames = frames
-        self.overwrite = FrameCollection()
-        self.underlay = FrameCollection(frames=underlay, mirrored=mirrored) if underlay else FrameCollection()
-        self.underlay_n = 0
-        self.overlay = FrameCollection(frames=overlay, mirrored=mirrored) if overlay else FrameCollection()
-        self.overlay_n = 0
+        self.overwrite = None  # can only be setted after initialization
+        self.underlay = FrameCollection(frames=underlay, mirrored=mirrored) if underlay else None
+        self.overlay = FrameCollection(frames=overlay, mirrored=mirrored) if overlay else None
         self.mirrored = mirrored
         self.frame_collection = FrameCollection(frames=frames, mirrored=mirrored)
         self.current_frame = self.frame_collection.get_frame()
-
-    def mirror(self):
-        self.frames.mirror()
-        self.underlay.mirror()
-        self.overlay.mirror()
-        self.mirrored = not self.mirrored  # toggle
 
     def step(self):
         """Execute frame"""
@@ -159,16 +148,12 @@ class EffectBase(object):
         self.current_frame = self.frame_collection.get_frame()
         self.frame_collection.next()
 
-        if not self.overwrite.is_empty:  # overwrites the frame
-            self.current_frame = self.overwrite.get_frame()
-            self.overwrite.next()
-            return  # frame is overwritten, so no need for over-/underlays
-        if not self.underlay.is_empty:  # adds another frame under the original frame
+        if self.underlay:  # adds another frame under the original frame
             self.current_frame = merge_frame(self.underlay.get_frame(), self.current_frame)
-            self.underlay.next()
-        if not self.overlay.is_empty:  # adds another frome over the original frame
+        if self.overlay:  # adds another frome over the original frame
             self.current_frame = merge_frame(self.current_frame, self.overlay.get_frame())
-            self.overlay.next()
+        if self.overwrite:  # overwrites all of the above
+            self.current_frame = self.overwrite.get_frame()
 
     def loop(self):
         """Run through the frames until stopped"""
@@ -178,6 +163,7 @@ class EffectBase(object):
                 time.sleep(1/self.fps)
         except KeyboardInterrupt:
             pass
+
 
 class Effect(EffectBase):
     def __init__(self, *args, **kwargs):
