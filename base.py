@@ -108,6 +108,10 @@ class EffectBase(object):
         except KeyboardInterrupt:
             pass
 
+class Effect(EffectBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
 class VariableDelay(object):
     def __init__(self, min=None, max=None):
         self.min = 0 if not min else min

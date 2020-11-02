@@ -1,9 +1,5 @@
-from base import EffectBase, VariableDelay
+from base import EffectBase, Effect, VariableDelay
 import random
-
-class Precipitation(EffectBase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
 class Thunder(EffectBase):
     def __init__(self, *args, **kwargs):
@@ -70,12 +66,12 @@ snow_layer = [
 
 if __name__=="__main__":
     # examples
-    drip = Precipitation(frames=raindrop_dripping, fps=3)
-    rain = Precipitation(frames=raindrop_falling, fps=10)
-    heavy_rain = Precipitation(frames=raindrop_falling, fps=10, overlay=flood)
-    snow = Precipitation(frames=snow_falling, fps=3)
-    heavy_snow = Precipitation(frames=snow_falling, fps=5, overlay=snow_layer)
+    drip = Effect(frames=raindrop_dripping, fps=3)
+    rain = Effect(frames=raindrop_falling, fps=10)
+    heavy_rain = Effect(frames=raindrop_falling, fps=10, overlay=flood)
+    snow = Effect(frames=snow_falling, fps=3)
+    heavy_snow = Effect(frames=snow_falling, fps=5, overlay=snow_layer)
 
     print("starting...")
-    effect = Thunder(frames=raindrop_falling, fps=10, mirror=True)
+    effect = Thunder(frames=raindrop_falling, fps=5)
     effect.loop()
