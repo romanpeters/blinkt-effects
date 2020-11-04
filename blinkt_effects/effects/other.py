@@ -1,8 +1,17 @@
-from base import Effect, LightnessAdjust
+from effects_base import Effect
+
+# class Thunder(EffectBase):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#
+#     def custom_action(self):
+#         if random.randint(0, 15) == 1:
+#             self.add_overwrite(thunder_flash)
+
 
 X__________ = (0, 0, 0)
 
-kit = [
+knight_rider = [
     [(255, 0, 0), X__________, X__________, X__________, X__________, X__________, X__________, X__________],
     [(8, 0, 0), (255, 0, 0), X__________, X__________, X__________, X__________, X__________, X__________],
     [X__________, (8, 0, 0), (255, 0, 0), X__________, X__________, X__________, X__________, X__________],
@@ -21,14 +30,7 @@ kit = [
     [(255, 0, 0), (8, 0, 0), X__________, X__________, X__________, X__________, X__________, X__________],
 ]
 
-pulse_light = [
-    [X__________, X__________, X__________, X__________, (255, 255, 255), X__________, X__________, X__________],
-    [LightnessAdjust(increase=-10, repeat=10)],
-    [LightnessAdjust(increase=10, repeat=10)]
-]
 
 if __name__=="__main__":
-    knightrider = Effect(frames=kit)
-    pulse = Effect(frames=pulse_light, fps=10)
-
-    pulse.loop()
+    knightrider = Effect(frames=knight_rider)
+    knightrider.loop()
