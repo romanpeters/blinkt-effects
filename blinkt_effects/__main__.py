@@ -17,7 +17,7 @@ available_frames = {'raindrop_falling': weather.raindrop_falling,
 
 @click.command()
 @click.option('--frames', prompt='Which frames?',
-              help=', '.join(available_frames.keys()))
+              help=', '.join(available_frames.keys()) + ', or specify the path to a PNG sprite')
 @click.option('--fps', default=5, help='Frames per second')
 @click.option('--brightness', default=0.2, help='LED brightness')
 @click.option('--mirrored', default=False, help='Mirror all frames')

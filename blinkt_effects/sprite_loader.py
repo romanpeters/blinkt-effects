@@ -11,6 +11,7 @@ class Sprite(object):
         self.blue = [d[2] for d in self.data]
 
     def get_frames(self):
+        """Convert image data to a list of RGB values, parseable by FrameCollection"""
         result = []
         line = []
         for (r, g, b) in zip(self.red, self.green, self.blue):
